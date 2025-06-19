@@ -6,6 +6,8 @@ O usuário tem as seguintes opções:
 
 * Adicionar novo produto no carrinho
 
+* Atualizar a quantia de um dos produtos do carrinho
+
 * Remover um produto do carrinho
 
 * Ver todos os produtos atuais do carrinho (com valor total dos produtos)
