@@ -14,6 +14,8 @@ O usuário tem as seguintes opções:
 
 * Cadastrar um novo produto no sistema
 
+* Atualizar um produto do sistema
+
 * Remover um cadastro do sistema
 
 * Ver todos os cadastros do sistema
@@ -21,5 +23,3 @@ O usuário tem as seguintes opções:
 * Finalizar compras (mostrar o preço total e esvaziar o carrinho)
 
 * Finalizar programa
-
-
