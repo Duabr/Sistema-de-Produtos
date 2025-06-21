@@ -1,27 +1,37 @@
 #include <stdio.h>
 #include <locale>
 #include <stdlib.h>
+#include <string.h>
 #include <iostream>
+#include <vector>
 
-#define MAX 99
 
-struct
+struct si
 {
-    int* id = (int*) malloc(sizeof(int)*MAX);
-    int* nome = (int*) malloc(sizeof(int)*MAX);
-    int* preco = (int*) malloc(sizeof(int)*MAX);
-} SI;
+    std::vector<int> id = {1, 2, 3, 4, 5}; 
+    std::vector<std::string> nome = {};
+    std::vector<double> preco = {};
+} si; // Produtos do Sistema Interno (SI)
 
-struct
+struct carrinho
 {
-    int* id = (int*) malloc(sizeof(int)*MAX);
-    int* nome = (int*) malloc(sizeof(int)*MAX);
-    int* preco = (int*) malloc(sizeof(int)*MAX);
-}carrinho;
+    std::vector<int> id;
+    std::vector<std::string> nome;
+    std::vector<double> preco;
+    std::vector<int> quanti;
+}carrinho; // Produtos do Carrinho
 
+int acharMaior(std::vector<int> lista){ // Achar o maior número de uma lista (para gerar um novo id pra todo novo cadastro no SI)
+    int maior=lista[0];
+    for (int i=1; i<lista.size(); i++){
+        if (lista[i] > maior){
+            maior=lista[i];
+        }
+    }
+    return maior;
+}
 
-
-int listaMenus(){
+int listaMenus(){ // Mostra os menus acessíveis com a opção de terminar o programa
     int escolha;
     printf("-------------------LISTA DE MENUS------------------- \n");
     printf("1. Menu do carrinho; \n");
@@ -29,7 +39,7 @@ int listaMenus(){
     printf("3. Terminar programa; \n");
     printf("Digite um número de 1 a 3: ");
     scanf("%d", &escolha);
-    while (escolha<1 or escolha>2){
+    while (escolha<1 or escolha>3){
         printf("Valor inválido. Digite um número de 1 a 3: ");
         scanf("%d", &escolha);
     }
@@ -37,7 +47,7 @@ int listaMenus(){
     return escolha;
 }
 
-int menuCarrinho(){ // Mostra o menu de escolhas, lendo e retornando a escolha do usuário
+int menuCarrinho(){ // Mostra o menu do carrinho
     int escolha;
     int n = 4;
     printf("----------------------CARRINHO---------------------- \n");
@@ -46,7 +56,7 @@ int menuCarrinho(){ // Mostra o menu de escolhas, lendo e retornando a escolha d
     printf("2. Remover produto do carrinho \n");
     printf("3. Atualizar um dos produtos do carrinho; \n");
     printf("4. Listar todos os produtos do carrinho; \n");
-    printf("Digite um número de 0 a %d para escolher uma opção: \n", n);
+    printf("Digite um número de 0 a %d para escolher uma opção: ", n);
     scanf("%d", &escolha);
     while (escolha<0 or escolha>n){
         printf("Valor inválido. Digite um número de 0 a %d: ", n);
@@ -56,7 +66,7 @@ int menuCarrinho(){ // Mostra o menu de escolhas, lendo e retornando a escolha d
     return escolha;
 }
 
-int menuSI(){
+int menuSI(){ // Mostra o menu do SI
     int escolha;
     int n = 4;
     printf("-------------------SISTEMA INTERNO------------------ \n");
@@ -77,9 +87,13 @@ int menuSI(){
     return escolha;
 }
 
-void addCadastro(){ // Cadastra um produto no sistema
+void addCadastro(std::string nome, int preco){ // Cadastra um produto no sistema
+    si.id.push_back(acharMaior(si.id));
+
 
 }
+
+
 
 void attCadastro(){ // Atualiza um produto do sistema
 
@@ -115,11 +129,28 @@ void limparCompras(){ // Finaliza as compras e esvazia o carrinho
 
 int main() {
     setlocale(LC_ALL, "");
-    int escolha=0;
-    while (escolha!=3){
+    int escolha;
+    while (true){
         escolha = listaMenus();
-        while (escolha=1){
-            escolha=menuCarrinho();
+        if (escolha==1){ // Menu do carrinho
+            while (true){
+                escolha=menuCarrinho();
+                if (escolha==0){
+                    break;
+                }
+            }
+        }
+        if (escolha==2){ // Menu do SI
+            while (true){
+                escolha=menuSI();
+                if (escolha==0){
+                    break;
+                }
+            }
+        }
+        if (escolha==3){
+            printf("Finalizando programa...\n");
+            break;
         }
     }
 }
