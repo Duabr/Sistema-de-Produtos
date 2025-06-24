@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <locale>
-#include <stdlib.h>
 #include <string.h>
 #include <iostream>
 #include <vector>
@@ -60,7 +59,7 @@ int menuCarrinho(){ // Mostra o menu do carrinho
     printf("2. Remover produto do carrinho \n");
     printf("3. Atualizar um dos produtos do carrinho; \n");
     printf("4. Listar todos os produtos do carrinho; \n");
-    printf("5. Terminar compras (esvazia o carrinho e mostra o preço total)");
+    printf("5. Terminar compras (esvazia o carrinho e mostra o preço total) \n");
     printf("Digite um número de 0 a %d para escolher uma opção: ", n);
     scanf("%d", &escolha);
 
@@ -114,11 +113,14 @@ void addCadastro(){ // Cadastra um produto no sistema
 }
 
 void rmvCadastro(){ // Remove um cadastro do sistema
-    int id;
-    int esc;
+    int id, esc;
 
     printf("Digite o ID do produto que deseja remover: ");
     scanf("%d", &id);
+    while (id>=si.id.size() or id<0){
+        printf("ID inválido. Digite um ID existente: ");
+        scanf("%d", &id);
+    }
 
     std::cout << si.nome[id] << ", R$" << si.preco[id] << ". \n";
     printf("É esse o produto que deseja remover? Digite 1 para sim: ");
@@ -132,11 +134,45 @@ void rmvCadastro(){ // Remove um cadastro do sistema
             si.id[i]--;
         }
         printf("Prouduto removido com sucesso!\n");
+        system("pause");
+    } else {
+        printf("Processo Cancelado. \n");
+        system("pause");
     }
 }
 
 void attCadastro(){ // Edita um produto do sistema
+    int id, esc;
 
+    printf("Digite o ID do produto que deseja atualizar: ");
+    scanf("%d", &id);
+    while (id>=si.id.size() or id<0){
+        printf("ID inválido. Digite um ID existente: ");
+        scanf("%d", &id);
+    }
+
+    std::cout << si.nome[id] << ", R$" << si.preco[id] << ". \n";
+    printf("É esse o produto que deseja atualizar? Digite 1 para sim: ");
+    scanf("%d", &esc);
+    
+    if (esc==1){
+        std::string novoNome;
+        double novoPreco;
+        while ((getchar()) != '\n'); // É necessário para limpar o buffer e o std::getline() ler corretamente o nome do produto
+
+        std::cout << "Digite o nome do novo produto: ";
+        std::getline(std::cin, novoNome);
+        std::cout << "Digite o preço para o novo produto: ";
+        std::cin >> novoPreco;
+
+        si.nome[id] = novoNome;
+        si.preco[id] = novoPreco;
+        printf("Dados atualizados!\n");
+        system("pause");
+    } else {
+        printf("Processo cancelado. \n");
+        system("pause");
+    }
 }
 
 void listarCadastros(){ // Lista todos os produtos cadastrados no sistema
