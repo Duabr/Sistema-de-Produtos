@@ -21,6 +21,32 @@ struct carrinho
 }carrinho; // Produtos do Carrinho
 // Dica: dá pra usar a função "push_back" para adicionar um novo item ao final de uma lista (igual eu usei na função addCadastro por exemplo)
 
+void lerArquivo(){ // Ler os dados necessários de um arquivo txt.
+    FILE *arq;
+    char Linha[100]; // Variável para armazenar a linha lida do arquivo
+    arq = fopen("dados.txt", "rt");
+    if (arq == NULL){
+        printf("Erro ao abrir o arquivo dados.txt \n");
+        return;
+    }
+    
+    std::string nome;
+    double preco;
+    int id;
+    
+    int i = 1;
+    while (!feof(arq))
+    {
+        // Lê uma linha (inclusive com o '\n')
+        char *result = fgets(Linha, 100, arq);  // o 'fgets' lê até 99 caracteres ou até o '\n'
+        if (result){ // Se foi possível ler
+            printf("Linha %d : %s",i,Linha);
+        }
+        i++;
+    }
+    fclose(arq);
+}
+
 int acharMaior(std::vector<int> lista){ // Achar o maior número de uma lista (para gerar um novo id pra todo novo cadastro no SI)
     int maior=lista[0];
     for (int i=1; i<lista.size(); i++){
@@ -40,7 +66,7 @@ int listaMenus(){ // Mostra os menus acessíveis com a opção de terminar o pro
     printf("Digite um número de 1 a 3: ");
     scanf("%d", &escolha);
 
-    while (escolha<1 or escolha>3){
+    while (escolha<1 || escolha>3){
         printf("Valor inválido. Digite um número de 1 a 3: ");
         scanf("%d", &escolha);
     }
@@ -63,7 +89,7 @@ int menuCarrinho(){ // Mostra o menu do carrinho
     printf("Digite um número de 0 a %d para escolher uma opção: ", n);
     scanf("%d", &escolha);
 
-    while (escolha<0 or escolha>n){
+    while (escolha<0 || escolha>n){
         printf("Valor inválido. Digite um número de 0 a %d: ", n);
         scanf("%d", &escolha);
     }
@@ -85,7 +111,7 @@ int menuSI(){ // Mostra o menu do SI
     printf("Digite um número de 0 a %d para escolher uma opção: ", n);
     scanf("%d", &escolha);
 
-    while (escolha<0 or escolha>n){
+    while (escolha<0 || escolha>n){
         printf("Valor inválido. Digite um número de 0 a %d: ", n);
         scanf("%d", &escolha);
     }
@@ -117,7 +143,7 @@ void rmvCadastro(){ // Remove um cadastro do sistema
 
     printf("Digite o ID do produto que deseja remover: ");
     scanf("%d", &id);
-    while (id>=si.id.size() or id<0){
+    while (id>=si.id.size() || id<0){
         printf("ID inválido. Digite um ID existente: ");
         scanf("%d", &id);
     }
@@ -146,7 +172,7 @@ void attCadastro(){ // Edita um produto do sistema
 
     printf("Digite o ID do produto que deseja atualizar: ");
     scanf("%d", &id);
-    while (id>=si.id.size() or id<0){
+    while (id>=si.id.size() || id<0){
         printf("ID inválido. Digite um ID existente: ");
         scanf("%d", &id);
     }
@@ -206,6 +232,7 @@ void limparCompras(){ // Finaliza as compras, esvazia o carrinho e retorna o usu
 int main() {
     setlocale(LC_ALL, "");
     int escolha;
+    lerArquivo();
     while (true){
         escolha = listaMenus();
         if (escolha==1){ // Menu do carrinho
