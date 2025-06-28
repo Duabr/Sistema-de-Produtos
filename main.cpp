@@ -159,7 +159,7 @@ void rmvCadastro(){ // Remove um cadastro do sistema
         for (int i=id; i<si.id.size(); i++){
             si.id[i]--;
         }
-        printf("Prouduto removido com sucesso!\n");
+        printf("Produto removido com sucesso!\n");
         system("pause");
     } else {
         printf("Processo Cancelado. \n");
@@ -210,23 +210,115 @@ void listarCadastros(){ // Lista todos os produtos cadastrados no sistema
 }
 
 void addProduCarrinho(){ // Adiciona um produto ao carrinho
+    int id;
+    int quanti;
 
+    printf("Digite o ID do produto que deseja adicionar ao carrinho: ");
+    scanf("%d", &id);
+
+    if (id < 0 || id >= si.id.size()) {
+        printf("ID inválido.\n");
+        return;
+    }
+
+    printf("Digite a quantidade desejada: ");
+    scanf("%d", &quanti);
+
+    if (quanti <= 0) {
+        printf("Quantidade inválida.\n");
+        return;
+    }
+    
+    for (int i = 0; i < carrinho.id.size(); i++) {
+        if (carrinho.id[i] == id) {
+            carrinho.quanti[i] += quanti;
+            printf("Quantidade atualizada no carrinho.\n");
+            return;
+        }
+    }
+
+    carrinho.id.push_back(id);
+    carrinho.nome.push_back(si.nome[id]);
+    carrinho.preco.push_back(si.preco[id]);
+    carrinho.quanti.push_back(quanti);
+
+    printf("Produto adicionado ao carrinho!\n");
 }
 
 void rmvProduCarrinho(){ // Remove um produto do carrinho
-    
+    int id;
+    printf("Digite o ID do produto que deseja remover do carrinho: ");
+    scanf("%d", &id);
+
+    for (int i = 0; i < carrinho.id.size(); i++) {
+        if (carrinho.id[i] == id) {
+            carrinho.id.erase(carrinho.id.begin() + i);
+            carrinho.nome.erase(carrinho.nome.begin() + i);
+            carrinho.preco.erase(carrinho.preco.begin() + i);
+            carrinho.quanti.erase(carrinho.quanti.begin() + i);
+            printf("Produto removido do carrinho.\n");
+            return;
+        }
+    }
+    printf("Produto não encontrado no carrinho.\n");
 }
 
 void attProduCarrinho(){ // Atualiza a quantia de um dos produtos do carrinho
+    int id, novaQuantidade;
+    printf("Digite o ID do produto no carrinho que deseja atualizar: ");
+    scanf("%d", &id);
 
+    for (int i = 0; i < carrinho.id.size(); i++) {
+        if (carrinho.id[i] == id) {
+            printf("Digite a nova quantidade: ");
+            scanf("%d", &novaQuantidade);
+
+            if (novaQuantidade <= 0) {
+                printf("Quantidade inválida.\n");
+                return;
+            }
+
+            carrinho.quanti[i] = novaQuantidade;
+            printf("Quantidade atualizada!\n");
+            return;
+        }
+    }
+    printf("Produto não encontrado no carrinho.\n");
 }
 
 void listarCarrinho(){ // Lista todos os produtos do carrinho
+    if (carrinho.id.empty()) {
+        printf("Carrinho vazio.\n");
+        return;
+    }
 
+    double total = 0.0;
+    printf("Produtos no carrinho:\n");
+    for (int i = 0; i < carrinho.id.size(); i++) {
+        std::cout << "Produto: " << carrinho.nome[i] 
+                  << " | Preço: R$" << carrinho.preco[i] 
+                  << " | Quantidade: " << carrinho.quanti[i]
+                  << " | Subtotal: R$" << carrinho.preco[i] * carrinho.quanti[i] << "\n";
+        total += carrinho.preco[i] * carrinho.quanti[i];
+    }
+    printf("Total: R$%.2lf\n", total);
 }
 
 void limparCompras(){ // Finaliza as compras, esvazia o carrinho e retorna o usuário para a lista de menus
+    if (carrinho.id.empty()) {
+        printf("Carrinho já está vazio.\n");
+        return;
+    }
 
+    listarCarrinho();
+
+    printf("Finalizando compras...\n");
+    carrinho.id.clear();
+    carrinho.nome.clear();
+    carrinho.preco.clear();
+    carrinho.quanti.clear();
+
+    printf("Compra finalizada e carrinho esvaziado.\n");
 }
 
 int main() {
@@ -240,9 +332,21 @@ int main() {
                 escolha = menuCarrinho();
                 if (escolha==0){
                     break;
+                } else if (escolha==1){ 
+                    addProduCarrinho();
+                } else if (escolha==2){
+                    rmvProduCarrinho();
+                } else if (escolha==3){
+                    attProduCarrinho();
+                } else if (escolha==4){
+                    listarCarrinho();
+                } else if (escolha==5){
+                    limparCompras();
                 }
             }
         }
+
+        
         if (escolha==2){ // Menu do SI
             while (true){
                 escolha = menuSI();
