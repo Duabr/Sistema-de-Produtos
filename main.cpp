@@ -264,7 +264,8 @@ void rmvProduCarrinho(){ // Remove um produto do carrinho
 }
 
 void attProduCarrinho(){ // Atualiza a quantia de um dos produtos do carrinho
-    int id, novaQuantidade;
+    int id;
+    int novaQuantidade;
     printf("Digite o ID do produto no carrinho que deseja atualizar: ");
     scanf("%d", &id);
 
