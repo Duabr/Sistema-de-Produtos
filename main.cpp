@@ -1,9 +1,9 @@
 #include <stdio.h>
-#include <locale>
-#include <string.h>
 #include <iostream>
 #include <vector>
+#include <string>
 
+int linhaAtual = 1; // Variável global para controlar a linha atual do arquivo
 
 struct si
 {
@@ -19,32 +19,39 @@ struct carrinho
     std::vector<double> preco;
     std::vector<int> quanti;
 }carrinho; // Produtos do Carrinho
-// Dica: dá pra usar a função "push_back" para adicionar um novo item ao final de uma lista (igual eu usei na função addCadastro por exemplo)
 
-void lerArquivo(){ // Ler os dados necessários de um arquivo txt.
+std::string lerLinha(int numeroLinha) { // Lê e retorna o conteúdo de uma linha específica do arquivo sem a quebra de linha
     FILE *arq;
-    char Linha[100]; // Variável para armazenar a linha lida do arquivo
+    char Linha[100]; // Variável para armazenar o conteúdo de uma linha
     arq = fopen("dados.txt", "rt");
-    if (arq == NULL){
+    if (arq == NULL) {
         printf("Erro ao abrir o arquivo dados.txt \n");
-        return;
+        return "";
     }
-    
-    std::string nome;
-    double preco;
-    int id;
-    
+
     int i = 1;
-    while (!feof(arq))
-    {
-        // Lê uma linha (inclusive com o '\n')
-        char *result = fgets(Linha, 100, arq);  // o 'fgets' lê até 99 caracteres ou até o '\n'
-        if (result){ // Se foi possível ler
-            printf("Linha %d : %s",i,Linha);
+    std::string conteudo = "";
+    while (fgets(Linha, sizeof(Linha), arq)) {
+        if (i == numeroLinha) {
+            conteudo = Linha;
+            if (!conteudo.empty() && conteudo.back() == '\n') { // Remove a quebra de linha, se existir
+                conteudo.pop_back();
+            }
+            break;
         }
         i++;
     }
     fclose(arq);
+    if (conteudo.empty()) {
+        printf("Linha %d não encontrada no arquivo.\n", numeroLinha);
+        return "";
+    }
+    std::cout << conteudo << std::endl; // Mostra o conteúdo lido
+    return conteudo;
+}
+
+double stringParaDouble(const std::string& str) {
+    return std::stod(str);
 }
 
 int acharMaior(std::vector<int> lista){ // Achar o maior número de uma lista (para gerar um novo id pra todo novo cadastro no SI)
@@ -57,17 +64,18 @@ int acharMaior(std::vector<int> lista){ // Achar o maior número de uma lista (p
     return maior;
 }
 
-int listaMenus(){ // Mostra os menus acessíveis com a opção de terminar o programa
+int listaMenus(int linhaEscolha){ // Mostra os menus acessíveis com a opção de terminar o programa
     int escolha;
     printf("-------------------LISTA DE MENUS------------------- \n");
     printf("1. Menu do carrinho; \n");
     printf("2. Menu do Sistema Interno (SI); \n");
     printf("3. Terminar programa; \n");
     printf("Digite um número de 1 a 3: ");
-    scanf("%d", &escolha);
+    escolha = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
 
     while (escolha<1 || escolha>3){
-        printf("Valor inválido. Digite um número de 1 a 3: ");
+        printf("Valor inválido. Digite um número de 1 a 3: \n");
         scanf("%d", &escolha);
     }
 
@@ -75,7 +83,7 @@ int listaMenus(){ // Mostra os menus acessíveis com a opção de terminar o pro
     return escolha;
 }
 
-int menuCarrinho(){ // Mostra o menu do carrinho
+int menuCarrinho(int linhaEscolha){ // Mostra o menu do carrinho
     int escolha;
     int n = 5;
 
@@ -87,8 +95,8 @@ int menuCarrinho(){ // Mostra o menu do carrinho
     printf("4. Listar todos os produtos do carrinho; \n");
     printf("5. Terminar compras (esvazia o carrinho e mostra o preço total) \n");
     printf("Digite um número de 0 a %d para escolher uma opção: ", n);
-    scanf("%d", &escolha);
-
+    escolha = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
     while (escolha<0 || escolha>n){
         printf("Valor inválido. Digite um número de 0 a %d: ", n);
         scanf("%d", &escolha);
@@ -98,7 +106,7 @@ int menuCarrinho(){ // Mostra o menu do carrinho
     return escolha;
 }
 
-int menuSI(){ // Mostra o menu do SI
+int menuSI(int linhaEscolha){ // Mostra o menu do SI
     int escolha;
     int n = 4;
 
@@ -109,7 +117,8 @@ int menuSI(){ // Mostra o menu do SI
     printf("3. Editar cadastro do SI; \n");
     printf("4. Listar todos os cadastros do SI; \n");
     printf("Digite um número de 0 a %d para escolher uma opção: ", n);
-    scanf("%d", &escolha);
+    escolha = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
 
     while (escolha<0 || escolha>n){
         printf("Valor inválido. Digite um número de 0 a %d: ", n);
@@ -120,29 +129,48 @@ int menuSI(){ // Mostra o menu do SI
     return escolha;
 }
 
-void addCadastro(){ // Cadastra um produto no sistema
+void addCadastro(int linhaEscolha){ // Cadastra um produto no sistema
     std::string nome;
     double preco;
 
-    while ((getchar()) != '\n'); // É necessário para limpar o buffer e o std::getline() ler corretamente o nome do produto
-
     std::cout << "Digite o nome do novo produto: ";
-    std::getline(std::cin, nome);
+    nome = lerLinha(linhaEscolha);
+    linhaAtual++;
+    if (nome.empty()) {
+        printf("Nome inválido. Processo cancelado.\n");
+        system("pause");
+        return;
+    }
+
     std::cout << "Digite o preço para o novo produto: ";
-    std::cin >> preco;
+    std::string precoStr = lerLinha(linhaEscolha+1);
+    linhaAtual++;
+    try {
+        preco = stringParaDouble(precoStr);
+    } catch (const std::invalid_argument&) {
+        printf("Preço inválido. Processo cancelado.\n");
+        system("pause");
+        return;
+    } catch (const std::out_of_range&) {
+        printf("Preço fora do intervalo permitido. Processo cancelado.\n");
+        system("pause");
+        return;
+    }
 
     si.id.push_back(acharMaior(si.id)+1);
     si.nome.push_back(nome);
     si.preco.push_back(preco);
 
     printf("Produto cadastrado com sucesso! \n");
+    system("pause");
 }
 
-void rmvCadastro(){ // Remove um cadastro do sistema
+void rmvCadastro(int linhaEscolha){ // Remove um cadastro do sistema
     int id, esc;
 
     printf("Digite o ID do produto que deseja remover: ");
-    scanf("%d", &id);
+    id = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
     while (id>=si.id.size() || id<0){
         printf("ID inválido. Digite um ID existente: ");
         scanf("%d", &id);
@@ -150,7 +178,8 @@ void rmvCadastro(){ // Remove um cadastro do sistema
 
     std::cout << si.nome[id] << ", R$" << si.preco[id] << ". \n";
     printf("É esse o produto que deseja remover? Digite 1 para sim: ");
-    scanf("%d", &esc);
+    esc = lerLinha(linhaEscolha+1)[0] - '0';
+    linhaAtual++;
 
     if (esc==1){
         si.id.erase(si.id.begin() + id);
@@ -167,11 +196,12 @@ void rmvCadastro(){ // Remove um cadastro do sistema
     }
 }
 
-void attCadastro(){ // Edita um produto do sistema
+void attCadastro(int linhaEscolha){ // Edita um produto do sistema
     int id, esc;
 
     printf("Digite o ID do produto que deseja atualizar: ");
-    scanf("%d", &id);
+    id = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
     while (id>=si.id.size() || id<0){
         printf("ID inválido. Digite um ID existente: ");
         scanf("%d", &id);
@@ -179,17 +209,24 @@ void attCadastro(){ // Edita um produto do sistema
 
     std::cout << si.nome[id] << ", R$" << si.preco[id] << ". \n";
     printf("É esse o produto que deseja atualizar? Digite 1 para sim: ");
-    scanf("%d", &esc);
+    esc = lerLinha(linhaEscolha+1)[0] - '0';
+    linhaAtual++;
     
     if (esc==1){
         std::string novoNome;
         double novoPreco;
-        while ((getchar()) != '\n'); // É necessário para limpar o buffer e o std::getline() ler corretamente o nome do produto
-
+        
         std::cout << "Digite o nome do novo produto: ";
-        std::getline(std::cin, novoNome);
+        novoNome = lerLinha(linhaEscolha+2);
+        linhaAtual++;
+        if (novoNome.empty()) {
+            printf("Nome inválido. Processo cancelado.\n");
+            system("pause");
+            return;
+        }
         std::cout << "Digite o preço para o novo produto: ";
-        std::cin >> novoPreco;
+        novoPreco = stringParaDouble(lerLinha(linhaEscolha+3));
+        linhaAtual++;
 
         si.nome[id] = novoNome;
         si.preco[id] = novoPreco;
@@ -209,12 +246,13 @@ void listarCadastros(){ // Lista todos os produtos cadastrados no sistema
     system("pause");
 }
 
-void addProduCarrinho(){ // Adiciona um produto ao carrinho
+void addProduCarrinho(int linhaEscolha){ // Adiciona um produto ao carrinho
     int id;
     int quanti;
 
     printf("Digite o ID do produto que deseja adicionar ao carrinho: ");
-    scanf("%d", &id);
+    id = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
 
     if (id < 0 || id >= si.id.size()) {
         printf("ID inválido.\n");
@@ -222,7 +260,8 @@ void addProduCarrinho(){ // Adiciona um produto ao carrinho
     }
 
     printf("Digite a quantidade desejada: ");
-    scanf("%d", &quanti);
+    quanti = lerLinha(linhaEscolha+1)[0] - '0';
+    linhaAtual++;
 
     if (quanti <= 0) {
         printf("Quantidade inválida.\n");
@@ -245,10 +284,11 @@ void addProduCarrinho(){ // Adiciona um produto ao carrinho
     printf("Produto adicionado ao carrinho!\n");
 }
 
-void rmvProduCarrinho(){ // Remove um produto do carrinho
+void rmvProduCarrinho(int linhaEscolha){ // Remove um produto do carrinho
     int id;
     printf("Digite o ID do produto que deseja remover do carrinho: ");
-    scanf("%d", &id);
+    id = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
 
     for (int i = 0; i < carrinho.id.size(); i++) {
         if (carrinho.id[i] == id) {
@@ -263,16 +303,18 @@ void rmvProduCarrinho(){ // Remove um produto do carrinho
     printf("Produto não encontrado no carrinho.\n");
 }
 
-void attProduCarrinho(){ // Atualiza a quantia de um dos produtos do carrinho
+void attProduCarrinho(int linhaEscolha){ // Atualiza a quantia de um dos produtos do carrinho
     int id;
     int novaQuantidade;
     printf("Digite o ID do produto no carrinho que deseja atualizar: ");
-    scanf("%d", &id);
+    id = lerLinha(linhaEscolha)[0] - '0';
+    linhaAtual++;
 
     for (int i = 0; i < carrinho.id.size(); i++) {
         if (carrinho.id[i] == id) {
             printf("Digite a nova quantidade: ");
-            scanf("%d", &novaQuantidade);
+            novaQuantidade = lerLinha(linhaEscolha+1)[0] - '0';
+            linhaAtual++;
 
             if (novaQuantidade <= 0) {
                 printf("Quantidade inválida.\n");
@@ -325,20 +367,19 @@ void limparCompras(){ // Finaliza as compras, esvazia o carrinho e retorna o usu
 int main() {
     setlocale(LC_ALL, "");
     int escolha;
-    lerArquivo();
     while (true){
-        escolha = listaMenus();
+        escolha = listaMenus(linhaAtual);
         if (escolha==1){ // Menu do carrinho
             while (true){
-                escolha = menuCarrinho();
+                escolha = menuCarrinho(linhaAtual);
                 if (escolha==0){
                     break;
                 } else if (escolha==1){ 
-                    addProduCarrinho();
+                    addProduCarrinho(linhaAtual);
                 } else if (escolha==2){
-                    rmvProduCarrinho();
+                    rmvProduCarrinho(linhaAtual);
                 } else if (escolha==3){
-                    attProduCarrinho();
+                    attProduCarrinho(linhaAtual);
                 } else if (escolha==4){
                     listarCarrinho();
                 } else if (escolha==5){
@@ -350,15 +391,15 @@ int main() {
         
         if (escolha==2){ // Menu do SI
             while (true){
-                escolha = menuSI();
+                escolha = menuSI(linhaAtual);
                 if (escolha==0){
                     break;
                 } else if (escolha==1){
-                    addCadastro();
+                    addCadastro(linhaAtual);
                 } else if (escolha==2){
-                    rmvCadastro();
+                    rmvCadastro(linhaAtual);
                 } else if (escolha==3){
-                    attCadastro();
+                    attCadastro(linhaAtual);
                 } else if (escolha==4){
                     listarCadastros();
                 }
